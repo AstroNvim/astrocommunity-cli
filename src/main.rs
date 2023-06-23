@@ -3,7 +3,6 @@ use clap::{arg, command, Parser};
 
 use serde::Deserialize;
 
-
 #[derive(Debug, Deserialize)]
 struct RepoContent {
     path: String,
@@ -62,6 +61,6 @@ async fn main() -> Result<()> {
         "import = {}",
         match_.first().unwrap().path.replace('/', ".")
     );
-    print!(r#"}}"#);
+    println!(r#"}}"#);
     Ok(())
 }
