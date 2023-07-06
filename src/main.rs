@@ -51,16 +51,18 @@ async fn main() -> Result<()> {
     if match_.len() > 1 {
         println!("Multiple matches found. Please be more specific");
         return Ok(());
+fn wait_for_key(required_key: char) -> i32 {
+    let mut buffer = [0u8; 1];
+    io::stdin().read_exact(&mut buffer).unwrap();
+
+    let pressed_key = buffer[0] as char;
+
+    if pressed_key == required_key {
+        0
+    } else {
+        // Kill the process
+        std::process::exit(1);
     }
-    println!("Plugin with name: {:?} found", args.plugin_name);
-    println!(
-        "To add the plugin, add the following to your community.lua file or your plugin spec:"
-    );
-    print!(r#"{{"#);
-    print!(
-        "import = {}",
-        match_.first().unwrap().path.replace('/', ".")
-    );
-    println!(r#"}}"#);
+}
     Ok(())
 }
