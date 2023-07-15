@@ -1,15 +1,11 @@
 mod fzf;
 mod git_operations;
 
-use std::{
-    borrow::Cow,
-    io::{self},
-};
+use std::io;
 
 use anyhow::{Ok, Result};
 
 use itertools::Itertools;
-use serde::Deserialize;
 
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
 

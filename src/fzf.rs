@@ -28,18 +28,16 @@ impl Fzf {
     }
 
     pub fn write_to_stdin(&mut self, input: &[u8]) -> Result<()> {
-        match self.process.stdin.as_mut().unwrap().write_all(input) {
-            Err(why) => panic!("couldn't write to fzf stdin: {}", why),
-            _ => {}
+        if let Err(why) = self.process.stdin.as_mut().unwrap().write_all(input) {
+            panic!("couldn't write to fzf stdin: {}", why)
         }
         Ok(())
     }
 
     pub fn read_from_stdout(&mut self) -> Result<String> {
         let mut s = String::new();
-        match self.process.stdout.as_mut().unwrap().read_to_string(&mut s) {
-            Err(why) => panic!("couldn't read fzf stdout: {}", why),
-            _ => {}
+        if let Err(why) = self.process.stdout.as_mut().unwrap().read_to_string(&mut s) {
+            panic!("couldn't wait on fzf: {}", why)
         }
         Ok(s)
     }
