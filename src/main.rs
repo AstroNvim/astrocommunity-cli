@@ -2,9 +2,7 @@ mod fzf;
 
 use std::{
     borrow::Cow,
-    fs::{read_to_string, File},
-    io::{self, Read},
-    path::PathBuf,
+    io::{self},
 };
 
 use anyhow::{Ok, Result};
@@ -57,7 +55,6 @@ fn select_plugins() -> Result<()> {
         .map(|plugin| plugin.fzf_string.clone())
         // only if not windows
         .join("\n");
-    dbg!(&fzf_strings);
     let mut fzf = fzf::Fzf::new()?;
     fzf.write_to_stdin(fzf_strings.as_bytes())?;
     let result = fzf.read_from_stdout()?;
@@ -89,6 +86,9 @@ fn select_plugins() -> Result<()> {
         let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
         ctx.set_contents(import_statement).unwrap();
         println!("Added to clipboard");
+    } else {
+        println!("Here's the import statement:");
+        println!("{}", import_statement);
     }
     Ok(())
 }
