@@ -1,4 +1,7 @@
+mod fzf;
+
 use std::{
+    borrow::Cow,
     fs::{read_to_string, File},
     io::{self, Read},
     path::PathBuf,
@@ -8,7 +11,6 @@ use anyhow::{Ok, Result};
 
 use itertools::Itertools;
 use serde::Deserialize;
-use skim::prelude::*;
 
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
 
@@ -32,15 +34,12 @@ struct Tree {
 struct PluginInfo {
     group: String,
     name: String,
+    fzf_string: String,
 }
 
-impl SkimItem for PluginInfo {
+impl PluginInfo {
     fn text(&self) -> Cow<str> {
         Cow::Owned(format!("{} [{}]", &self.name, &self.group))
-    }
-
-    fn preview(&self, _context: PreviewContext) -> ItemPreview {
-        ItemPreview::AnsiText(format!("\x1b[3m{}\x1b[m{}", self.name, self.group))
     }
 }
 
@@ -51,41 +50,37 @@ async fn main() -> Result<()> {
 }
 
 fn select_plugins() -> Result<()> {
-    let options = SkimOptionsBuilder::default()
-        .height(Some("50%"))
-        .multi(true)
-        .no_clear(true)
-        .preview(Some("")) // preview should be specified to enable preview window
-        .build()?;
-    let (tx_item, rx_item): (SkimItemSender, SkimItemReceiver) = unbounded();
     let plugins = get_astrocommunity_tree()?;
-    add_plugins_to_skim(tx_item, plugins);
-    let selected_items = Skim::run_with(&options, Some(rx_item))
-        .map(|out| out.selected_items)
-        .unwrap_or_else(Vec::new)
+    // Convert strings to plugin_name [group_name] format
+    let fzf_strings = plugins
         .iter()
-        .map(|selected_item| {
-            (**selected_item)
-                .as_any()
-                .downcast_ref::<PluginInfo>()
+        .map(|plugin| plugin.fzf_string.clone())
+        // only if not windows
+        .join("\n");
+    dbg!(&fzf_strings);
+    let mut fzf = fzf::Fzf::new()?;
+    fzf.write_to_stdin(fzf_strings.as_bytes())?;
+    let result = fzf.read_from_stdout()?;
+    let selected_plugins = result
+        .split('\n')
+        .filter(|line| !line.is_empty())
+        .map(|line| {
+            plugins
+                .iter()
+                .find(|plugin| plugin.fzf_string == line)
                 .unwrap()
-                .to_owned()
+                .clone()
         })
         .collect::<Vec<PluginInfo>>();
 
-    println!("To install the plugins, add the following to your config:");
-    // Create a string with some capacity, to reduce the number of allocations
-    // Format of every line
-    // {import = "astrocommunity.{group}.{name}", enable = true},
-    let mut import_statement = String::with_capacity(50 * selected_items.len());
-    for item in selected_items.iter() {
+    let mut import_statement = String::with_capacity(50 * selected_plugins.len());
+    for item in selected_plugins.iter() {
         import_statement.push_str(&format!(
             "{{ import = \"astrocommunity.{group}.{name}\", enable = true }},\n",
             group = item.group,
             name = item.name
         ));
     }
-    println!("{}", import_statement);
     // Ask the user if they want the import statement to be added to their clipboard
     println!("Do you want to add this to your clipboard? [y/n]");
     let mut input = String::new();
@@ -98,20 +93,7 @@ fn select_plugins() -> Result<()> {
     Ok(())
 }
 
-fn add_plugins_to_skim(tx_item: SkimItemSender, plugins: Vec<(String, String)>) {
-    for plugin in plugins {
-        tx_item
-            .send(Arc::new(PluginInfo {
-                group: plugin.0,
-                name: plugin.1,
-            }))
-            .unwrap();
-    }
-    drop(tx_item); // so that skim could know when to stop waiting for more items.
-}
-
-fn get_astrocommunity_tree() -> Result<Vec<(String, String)>> {
-    // Run this if we are on windows
+fn get_astrocommunity_tree() -> Result<Vec<PluginInfo>> {
     let tree = std::process::Command::new("curl")
         .arg(GITHUB_API_TREE_RECURSIVE)
         .output()
@@ -120,7 +102,7 @@ fn get_astrocommunity_tree() -> Result<Vec<(String, String)>> {
     Ok(plugins)
 }
 
-fn parse_response(response: Vec<u8>) -> Result<Vec<(String, String)>> {
+fn parse_response(response: Vec<u8>) -> Result<Vec<PluginInfo>> {
     let tree: Tree = serde_json::from_slice(&response)?;
     let re = regex::Regex::new(r"/[^/]+$").unwrap();
     let plugin_paths = tree
@@ -143,24 +125,11 @@ fn parse_response(response: Vec<u8>) -> Result<Vec<(String, String)>> {
             path.split('/').collect::<Vec<_>>()
         })
         .filter(|p| p.len() >= 2)
-        .map(|p| (p[0].to_string(), p[1].to_string()))
+        .map(|p| PluginInfo {
+            group: p[0].to_string(),
+            name: p[1].to_string(),
+            fzf_string: format!("{} [{}]", p[1], p[0]),
+        })
         .collect::<Vec<_>>();
     Ok(unique_plugins)
-}
-
-fn wait_for_key(required_key: char) {
-    let mut buffer = [0u8; 1];
-    io::stdin().read_exact(&mut buffer).unwrap();
-
-    let pressed_key = buffer[0] as char;
-
-    if pressed_key != required_key {
-        std::process::exit(1);
-    };
-}
-
-async fn listen_to_ctrl_c() {
-    tokio::signal::ctrl_c().await.unwrap();
-
-    std::process::exit(0);
 }
