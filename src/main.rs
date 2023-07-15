@@ -44,6 +44,11 @@ impl PluginInfo {
 #[tokio::main]
 async fn main() -> Result<()> {
     println!("Welcome to the astrocommunity cli. Please select the plugins to install by pressing tab. When you're done, press enter and we'll add it to your config.");
+    tokio::spawn(async move {
+        tokio::signal::ctrl_c().await.unwrap();
+        dbg!("Exiting");
+        std::process::exit(0);
+    });
     select_plugins()
 }
 
