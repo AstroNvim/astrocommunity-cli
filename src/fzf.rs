@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use anyhow::Result;
 use std::io::prelude::*;
 use std::process::{Command, Stdio};
@@ -7,8 +8,13 @@ pub struct Fzf {
 }
 
 impl Fzf {
+    const ERR_FZF_NOT_FOUND: &str = "could not find fzf, is it installed?";
     pub fn new() -> Result<Self> {
-        let process = match Command::new("fzf")
+        #[cfg(windows)]
+        let program = which::which("fzf.exe").map_err(|_| anyhow!(Self::ERR_FZF_NOT_FOUND))?;
+        #[cfg(not(windows))]
+        let program = which::which("fzf").map_err(|_| anyhow!(Self::ERR_FZF_NOT_FOUND))?;
+        match Command::new(program)
             .arg("-m")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
