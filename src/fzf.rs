@@ -16,6 +16,8 @@ impl Fzf {
         let program = which::which("fzf").map_err(|_| anyhow!(Self::ERR_FZF_NOT_FOUND))?;
         match Command::new(program)
             .arg("-m")
+            .arg("--height=20")
+            .arg("--layout=reverse-list")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()
