@@ -23,10 +23,8 @@ impl Fzf {
             .spawn()
         {
             Err(why) => panic!("couldn't spawn fzf: {}", why),
-            Ok(process) => process,
-        };
-
-        Ok(Fzf { process })
+            Ok(process) => Ok(Fzf { process }),
+        }
     }
 
     pub fn write_to_stdin(&mut self, input: &[u8]) -> Result<()> {
