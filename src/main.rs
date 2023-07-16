@@ -29,7 +29,6 @@ fn select_plugins() -> Result<()> {
     let fzf_strings = plugins
         .iter()
         .map(|plugin| plugin.fzf_string.clone())
-        // only if not windows
         .join("\n");
     let mut fzf = fzf::Fzf::new()?;
     fzf.write_to_stdin(fzf_strings.as_bytes())?;
