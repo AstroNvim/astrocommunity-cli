@@ -1,5 +1,6 @@
 mod fzf;
 mod git_operations;
+mod opts;
 
 use std::io;
 
@@ -8,21 +9,23 @@ use anyhow::{Ok, Result};
 use itertools::Itertools;
 
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
+use opts::Cli;
 
-use crate::git_operations::GitOperations;
+use crate::{git_operations::GitOperations, opts::get_opts};
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let opts = get_opts();
     println!("Welcome to the astrocommunity cli. Please select the plugins to install by pressing tab. When you're done, press enter and we'll add it to your config.");
     tokio::spawn(async move {
         tokio::signal::ctrl_c().await.unwrap();
         dbg!("Exiting");
         std::process::exit(0);
     });
-    select_plugins()
+    select_plugins(&opts)
 }
 
-fn select_plugins() -> Result<()> {
+fn select_plugins(opts: &Cli) -> Result<()> {
     let git_ops = GitOperations::new();
     let plugins = git_ops.get_astrocommunity_tree()?;
     // Convert strings to plugin_name [group_name] format
@@ -54,16 +57,16 @@ fn select_plugins() -> Result<()> {
         ));
     }
     // Ask the user if they want the import statement to be added to their clipboard
-    println!("Do you want to add this to your clipboard? [y/n]");
-    let mut input = String::new();
-    io::stdin().read_line(&mut input)?;
-    if input.trim() == "y" {
-        let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-        ctx.set_contents(import_statement).unwrap();
-        println!("Added to clipboard");
-    } else {
-        println!("Here's the import statement:");
-        println!("{}", import_statement);
+    match opts.copy_to_clipboard {
+        true => copy_to_clipboard(import_statement)?,
+        false => println!("{}", import_statement),
     }
+    Ok(())
+}
+
+fn copy_to_clipboard(import_statement: String) -> Result<()> {
+    let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+    ctx.set_contents(import_statement).unwrap();
+    println!("Added to clipboard");
     Ok(())
 }

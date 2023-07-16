@@ -2,16 +2,18 @@ use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
-#[command(propagate_version = true)]
 pub struct Cli {
+    #[arg(short, long)]
+    pub copy_to_clipboard: bool,
+
     #[command(subcommand)]
-    pub commands: Commands,
+    pub commands: Option<Commands>,
 }
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Create a new astrocommunity plugin
-    New(NewArgs),
+    // Create a new astrocommunity plugin
+    // New(NewArgs),
 }
 
 #[derive(Args)]
