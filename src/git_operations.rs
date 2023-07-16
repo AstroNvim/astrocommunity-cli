@@ -1,14 +1,10 @@
 use anyhow::{anyhow, Result};
-use itertools::Itertools;
 use regex::Regex;
 use serde::Deserialize;
-use std::process::Command;
+use std::{collections::HashSet, process::Command};
 
 static GITHUB_API_TREE_RECURSIVE: &str =
     "https://api.github.com/repos/AstroNvim/astrocommunity/git/trees/HEAD?recursive=1";
-
-static GITHUB_API_TREE: &str =
-    "https://api.github.com/repos/AstroNvim/astrocommunity/git/trees/HEAD";
 
 const REPO_PATH_PREFIX: &str = "lua/astrocommunity/";
 
@@ -22,7 +18,7 @@ struct RepoContent {
     path: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) struct PluginInfo {
     pub group: String,
     pub name: String,
@@ -55,16 +51,17 @@ impl GitOperations {
         let tree: Tree = serde_json::from_slice(&response)?;
         let re = Regex::new(r"/[^/]+$")?;
 
-        let unique_plugins = tree
-            .tree
-            .iter()
-            .map(|path| re.replace(&path.path, "").replace(REPO_PATH_PREFIX, ""))
-            .unique()
-            .filter(|p| !p.contains(".github") && p != REPO_PATH_PREFIX)
-            .filter_map(Self::parse_plugin_info)
-            .collect();
+        let mut plugins = HashSet::new();
+        for content in tree.tree {
+            let path = re.replace(&content.path, "").replace(REPO_PATH_PREFIX, "");
+            if !path.contains(".github") && path != REPO_PATH_PREFIX {
+                if let Some(plugin) = Self::parse_plugin_info(path) {
+                    plugins.insert(plugin);
+                }
+            }
+        }
 
-        Ok(unique_plugins)
+        Ok(plugins.into_iter().collect())
     }
 
     fn parse_plugin_info(path: String) -> Option<PluginInfo> {
