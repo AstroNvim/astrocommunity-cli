@@ -6,6 +6,9 @@ pub struct Cli {
     #[arg(short, long)]
     pub copy_to_clipboard: bool,
 
+    #[arg(short, long)]
+    pub output: bool,
+
     #[command(subcommand)]
     pub commands: Option<Commands>,
 }
