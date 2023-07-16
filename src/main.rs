@@ -1,8 +1,7 @@
 mod fzf;
 mod git_operations;
 mod opts;
-
-use std::io;
+mod util;
 
 use anyhow::{Ok, Result};
 
@@ -10,6 +9,7 @@ use itertools::Itertools;
 
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use opts::Cli;
+use util::print_with_syntax;
 
 use crate::{git_operations::GitOperations, opts::get_opts};
 
@@ -57,9 +57,12 @@ fn select_plugins(opts: &Cli) -> Result<()> {
         ));
     }
     // Ask the user if they want the import statement to be added to their clipboard
-    match opts.copy_to_clipboard {
+    match &opts.copy_to_clipboard {
         true => copy_to_clipboard(import_statement)?,
-        false => println!("{}", import_statement),
+        false => match opts.output {
+            true => println!("{}", import_statement),
+            false => print_with_syntax(&import_statement),
+        },
     }
     Ok(())
 }
