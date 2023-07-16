@@ -51,7 +51,8 @@ impl GitOperations {
         let tree: Tree = serde_json::from_slice(&response)?;
         let re = Regex::new(r"/[^/]+$")?;
 
-        let mut plugins = HashSet::new();
+        // We don't know how many plugins there are, so we'll just allocate the max possible based on the number of files
+        let mut plugins = HashSet::with_capacity(tree.tree.len());
         for content in tree.tree {
             let path = re.replace(&content.path, "").replace(REPO_PATH_PREFIX, "");
             if !path.contains(".github") && path != REPO_PATH_PREFIX {
