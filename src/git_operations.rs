@@ -31,6 +31,7 @@ pub(crate) struct PluginInfo {
     pub group: String,
     pub name: String,
     pub fzf_string: String,
+    plugin_path: String,
 }
 
 pub struct GitOperations;
@@ -62,6 +63,7 @@ impl GitOperations {
         // We don't know how many plugins there are, so we'll just allocate the max possible based on the number of files
         let mut plugins = HashSet::with_capacity(tree.tree.len());
         for content in tree.tree {
+            // TODO: Move the replace operations below to parse_plugin_info
             let path = re.replace(&content.path, "").replace(REPO_PATH_PREFIX, "");
             if !path.contains(".github") && path != REPO_PATH_PREFIX {
                 if let Some(plugin) = Self::parse_plugin_info(path) {
@@ -80,6 +82,7 @@ impl GitOperations {
                 group: p[0].to_string(),
                 name: p[1].to_string(),
                 fzf_string: format!("{} [{}]", p[1], p[0]),
+                plugin_path: format!("{}/{}/README.md", REPO_PATH_PREFIX, path),
             })
         } else {
             None
