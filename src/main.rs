@@ -1,3 +1,4 @@
+mod file_system;
 mod fzf;
 mod git_operations;
 mod opts;
