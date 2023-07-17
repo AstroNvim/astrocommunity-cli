@@ -1,10 +1,18 @@
 use anyhow::{anyhow, Result};
+use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::Deserialize;
 use std::{collections::HashSet, process::Command};
 
-static GITHUB_API_TREE_RECURSIVE: &str =
-    "https://api.github.com/repos/AstroNvim/astrocommunity/git/trees/HEAD?recursive=1";
+use crate::file_system;
+
+pub static GITHUB_API_TREE_RECURSIVE: Lazy<String> = Lazy::new(|| {
+    let file_system = file_system::FileSystem::new();
+    format!(
+        "https://api.github.com/repos/AstroNvim/astrocommunity/git/trees/{}?recursive=1",
+        file_system.astrocommunity_hash
+    )
+});
 
 const REPO_PATH_PREFIX: &str = "lua/astrocommunity/";
 
@@ -34,7 +42,7 @@ impl GitOperations {
 
     pub(crate) fn get_astrocommunity_tree(&self) -> Result<Vec<PluginInfo>> {
         let output = Command::new("curl")
-            .arg(GITHUB_API_TREE_RECURSIVE)
+            .arg(GITHUB_API_TREE_RECURSIVE.clone())
             .output()?;
 
         if !output.status.success() {
