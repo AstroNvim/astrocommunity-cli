@@ -16,7 +16,6 @@ tokio = { version = "1", features = [
 clap = { version = "4", features = ["derive", "std", "help", "color"] }
 anyhow = "1"
 regex = "1"
-itertools = "0.11.0"
 cli-clipboard = "0.4.0"
 which = "4.4.0"
 syntect = "5.0.0"
