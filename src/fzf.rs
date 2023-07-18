@@ -1,7 +1,8 @@
-use anyhow::anyhow;
-use anyhow::Result;
-use std::io::prelude::*;
-use std::process::{Command, Stdio};
+use anyhow::{anyhow, Result};
+use std::{
+    io::prelude::*,
+    process::{Command, Stdio},
+};
 
 use crate::astrocommunity::PluginInfo;
 

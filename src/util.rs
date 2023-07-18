@@ -1,9 +1,9 @@
 use anyhow::Result;
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
-use syntect::easy::HighlightLines;
-use syntect::highlighting::ThemeSet;
-use syntect::parsing::SyntaxSet;
-use syntect::util::as_24_bit_terminal_escaped;
+use syntect::{
+    easy::HighlightLines, highlighting::ThemeSet, parsing::SyntaxSet,
+    util::as_24_bit_terminal_escaped,
+};
 
 pub(crate) fn print_with_syntax(s: &str) -> anyhow::Result<()> {
     // Load these once at the start of your program
