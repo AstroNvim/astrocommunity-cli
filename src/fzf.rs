@@ -3,6 +3,8 @@ use anyhow::Result;
 use std::io::prelude::*;
 use std::process::{Command, Stdio};
 
+use crate::astrocommunity::PluginInfo;
+
 pub struct Fzf {
     process: std::process::Child,
 }
@@ -40,5 +42,24 @@ impl Fzf {
             panic!("couldn't wait on fzf: {}", why)
         }
         Ok(s)
+    }
+
+    pub fn get_selected_plugins(
+        &mut self,
+        possible_plugins: &[PluginInfo],
+    ) -> Result<Vec<PluginInfo>> {
+        let selected_plugins = self
+            .read_from_stdout()?
+            .split('\n')
+            .filter(|line| !line.is_empty())
+            .map(|line| {
+                possible_plugins
+                    .iter()
+                    .find(|plugin| plugin.to_string() == *line)
+                    .unwrap()
+                    .clone()
+            })
+            .collect::<Vec<_>>();
+        Ok(selected_plugins)
     }
 }
