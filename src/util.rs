@@ -27,3 +27,12 @@ pub(crate) fn copy_to_clipboard(import_statement: &str) -> Result<()> {
     println!("Added to clipboard");
     Ok(())
 }
+
+pub fn ctrlc_handler() -> Result<()> {
+    tokio::spawn(async move {
+        tokio::signal::ctrl_c().await.unwrap();
+        dbg!("Exiting");
+        std::process::exit(0);
+    });
+    Ok(())
+}
