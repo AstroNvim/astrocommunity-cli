@@ -4,7 +4,7 @@ use regex::Regex;
 use serde::Deserialize;
 use std::{collections::HashSet, process::Command};
 
-use crate::file_system;
+use crate::{astrocommunity::PluginInfo, file_system};
 
 pub static GITHUB_API_TREE_RECURSIVE: Lazy<String> = Lazy::new(|| {
     let file_system = file_system::FileSystem::new();
@@ -24,14 +24,6 @@ struct Tree {
 #[derive(Debug, Deserialize)]
 struct RepoContent {
     path: String,
-}
-
-#[derive(Debug, Clone, Hash, Eq, PartialEq, PartialOrd, Ord)]
-pub(crate) struct PluginInfo {
-    pub group: String,
-    pub name: String,
-    pub fzf_string: String,
-    plugin_path: String,
 }
 
 pub struct GitOperations;
@@ -71,7 +63,6 @@ impl GitOperations {
                 }
             }
         }
-
         Ok(plugins.into_iter().collect())
     }
 
@@ -81,8 +72,6 @@ impl GitOperations {
             Some(PluginInfo {
                 group: p[0].to_string(),
                 name: p[1].to_string(),
-                fzf_string: format!("{} [{}]", p[1], p[0]),
-                plugin_path: format!("{}/{}/README.md", REPO_PATH_PREFIX, path),
             })
         } else {
             None
