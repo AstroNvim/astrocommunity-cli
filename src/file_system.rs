@@ -18,7 +18,7 @@ impl FileSystem {
             &std::fs::read_to_string(astrocommunity_dir.join("lazy-lock.json")).unwrap(),
         )
         .unwrap();
-        let astrocommunity_hash = if lazy_lock["astrocommunity"]["commit"].to_string() != "null" {
+        let astrocommunity_hash = if lazy_lock["astrocommunity"]["commit"] != "null" {
             lazy_lock["astrocommunity"]["commit"]
                 .to_string()
                 .trim_matches('"')
