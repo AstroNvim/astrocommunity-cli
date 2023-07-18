@@ -22,9 +22,10 @@ async fn main() -> Result<()> {
     });
     let astro = Astrocommunity::new();
     let plugins = astro.get_plugins()?;
+    dbg!(plugins.len());
     let mut fzf = fzf::Fzf::new()?;
     let fzf_string: String = plugins.iter().map(|plugin| plugin.to_string()).join("\n");
-    fzf.write_to_stdin(fzf_string.as_bytes())?;
+    fzf.write_to_stdin(&plugins)?;
     let selected_plugins = fzf.get_selected_plugins(&plugins)?;
     let mut import_statement = String::with_capacity(50 * selected_plugins.len());
     for item in selected_plugins.iter() {

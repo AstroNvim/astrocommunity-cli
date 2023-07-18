@@ -30,10 +30,11 @@ impl Fzf {
         }
     }
 
-    pub fn write_to_stdin(&mut self, input: &[u8]) -> Result<()> {
-        if let Err(why) = self.process.stdin.as_mut().unwrap().write_all(input) {
-            panic!("couldn't write to fzf stdin: {}", why)
-        }
+    pub fn write_to_stdin(&mut self, input: &[PluginInfo]) -> Result<()> {
+        let stdin = self.process.stdin.as_mut().unwrap();
+        input.iter().for_each(|plugin| {
+            writeln!(stdin, "{}", plugin.to_string()).unwrap();
+        });
         Ok(())
     }
 
