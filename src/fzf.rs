@@ -52,8 +52,7 @@ impl Fzf {
     ) -> Result<Vec<PluginInfo>> {
         let selected_plugins = self
             .read_from_stdout()?
-            .split('\n')
-            .filter(|line| !line.is_empty())
+            .lines()
             .map(|line| {
                 possible_plugins
                     .iter()
