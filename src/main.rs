@@ -6,6 +6,7 @@ mod opts;
 mod util;
 
 use anyhow::{Ok, Result};
+use std::fmt::Write;
 
 use crate::{astrocommunity::Astrocommunity, opts::get_opts, util::ctrlc_handler};
 
@@ -21,11 +22,11 @@ async fn main() -> Result<()> {
     let selected_plugins = fzf.get_selected_plugins(&plugins)?;
     let mut import_statement = String::with_capacity(60 * selected_plugins.len());
     for item in selected_plugins.iter() {
-        import_statement.push_str(&format!(
-            "{{ import = \"astrocommunity.{group}.{name}\", enable = true }},\n",
-            group = item.group,
-            name = item.name
-        ));
+        writeln!(
+            import_statement,
+            "{{ import = \"astrocommunity.{}.{}\", enable = true }},",
+            item.group, item.name
+        )?;
     }
     opts.ouput_to_prefered(&import_statement)?;
     Ok(())
