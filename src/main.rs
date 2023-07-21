@@ -10,14 +10,14 @@ use std::fmt::Write;
 
 use crate::{
     astrocommunity::Astrocommunity,
-    opts::{get_opts, Commands},
+    opts::{Cli, Commands},
     util::ctrlc_handler,
 };
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    let opts = Cli::get_opts();
     ctrlc_handler()?;
-    let opts = get_opts();
     match &opts.commands {
         Some(command) => match command {
             Commands::New {

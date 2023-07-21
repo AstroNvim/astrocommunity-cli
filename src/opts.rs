@@ -46,11 +46,13 @@ pub struct NewArgs {
     /// The name of the plugin. Could be the name of the pack, or the name of the plugin
     pub name: String,
 }
-pub fn get_opts() -> Cli {
-    Cli::parse()
-}
 
 impl Cli {
+    /// Parse the command line arguments
+    pub fn get_opts() -> Self {
+        Self::parse()
+    }
+
     /// Output the plugins based upon the user provided flags
     pub fn ouput_to_prefered(&self, import_statement: &str) -> Result<()> {
         if self.copy_to_clipboard {
