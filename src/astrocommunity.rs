@@ -80,7 +80,7 @@ impl Astrocommunity {
     }
 
     /// Find the astrocommunity folder in the `$NVIM_APPNAME` folder. Default to nvim if not found
-    fn find_astrocommunity_folder() -> Result<PathBuf> {
+    pub fn find_astrocommunity_folder() -> Result<PathBuf> {
         let astronvim_local_folder = Self::find_astronvim_local_folder()?;
         Ok(astronvim_local_folder.join("lazy/astrocommunity"))
     }
