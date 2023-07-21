@@ -43,8 +43,8 @@ impl GitOperations {
         }
     }
 
-    fn parse_response(response: Vec<u8>) -> Result<Vec<PluginInfo>> {
-        let tree: Vec<RepoContent> = serde_json::from_slice(&response)?;
+    fn parse_response(response: &[u8]) -> Result<Vec<PluginInfo>> {
+        let tree: Vec<RepoContent> = serde_json::from_slice(response)?;
         let re = Regex::new(r"/[^/]+$")?;
 
         // We don't know how many plugins there are, so we'll just allocate the max possible based on the number of files
