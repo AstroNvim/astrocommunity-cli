@@ -1,10 +1,9 @@
-use std::{env, path::PathBuf};
+use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
 
 use crate::{
-    astrocommunity::{self, Astrocommunity},
     util::{copy_to_clipboard, print_with_syntax},
 };
 
@@ -68,8 +67,6 @@ impl Cli {
     /// Create a new folder in atrocommunity directory
     /// The folder should be:
     pub fn create_new_plugin(&self, path: &str, group: &str, name: &str) -> Result<()> {
-        let astrocommunity_dir = astrocommunity::Astrocommunity::find_astrocommunity_folder()?;
-
         let new_plugin_dir = PathBuf::from(path).join(group).join(name);
         std::fs::create_dir_all(&new_plugin_dir)?;
         let new_plugin_file = new_plugin_dir.join("init.lua");

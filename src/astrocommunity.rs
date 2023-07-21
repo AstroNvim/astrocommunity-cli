@@ -16,13 +16,6 @@ pub static GITHUB_API_TREE_RECURSIVE: Lazy<String> = Lazy::new(|| {
     )
 });
 
-static REPO_PATH_PREFIX: &str = "lua/astrocommunity/";
-
-#[derive(Debug, Deserialize)]
-struct Tree {
-    tree: Vec<String>,
-}
-
 #[derive(Debug, Clone, Hash, Eq, PartialEq, PartialOrd, Ord)]
 pub struct PluginInfo {
     pub group: String,
