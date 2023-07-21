@@ -36,28 +36,17 @@ impl Cli {
 
     /// Create a new folder in atrocommunity directory
     /// The folder should be:
-    pub fn create_new_plugin(&self) {
-        let astrocommunity_dir =
-            astrocommunity::Astrocommunity::find_astrocommunity_folder().unwrap();
+    pub fn create_new_plugin(&self, path: &str, group: &str, name: &str) -> Result<()> {
+        let astrocommunity_dir = astrocommunity::Astrocommunity::find_astrocommunity_folder()?;
 
-        let appname = env::var("NVIM_APPNAME").unwrap_or("nvim".to_string());
-
-        let args = self.commands.as_ref().unwrap().clone();
-        match args {
-            Commands::New {
-                astrocommunity_path,
-                group,
-                name,
-            } => {
-                let new_plugin_dir = PathBuf::from(astrocommunity_path).join(group).join(name);
-                std::fs::create_dir_all(&new_plugin_dir).unwrap();
-                let new_plugin_file = new_plugin_dir.join("init.lua");
-                let new_plugin_readme = new_plugin_dir.join("README.md");
-                std::fs::write(new_plugin_file, "").unwrap();
-                std::fs::write(new_plugin_readme, "").unwrap();
-                println!("Created new plugin at {}", new_plugin_dir.to_str().unwrap());
-            }
-        }
+        let new_plugin_dir = PathBuf::from(path).join(group).join(name);
+        std::fs::create_dir_all(&new_plugin_dir)?;
+        let new_plugin_file = new_plugin_dir.join("init.lua");
+        let new_plugin_readme = new_plugin_dir.join("README.md");
+        std::fs::write(new_plugin_file, "")?;
+        std::fs::write(new_plugin_readme, "")?;
+        println!("Created new plugin at {}", new_plugin_dir.to_str().unwrap());
+        Ok(())
     }
 }
 
