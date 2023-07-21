@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     let mut fzf = fzf::Fzf::new()?;
     fzf.write_to_stdin(&plugins)?;
     let selected_plugins = fzf.get_selected_plugins(&plugins)?;
-    let mut import_statement = String::with_capacity(50 * selected_plugins.len());
+    let mut import_statement = String::with_capacity(60 * selected_plugins.len());
     for item in selected_plugins.iter() {
         import_statement.push_str(&format!(
             "{{ import = \"astrocommunity.{group}.{name}\", enable = true }},\n",
