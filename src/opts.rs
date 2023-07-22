@@ -4,8 +4,11 @@ use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
 
 use crate::{
+    astrocommunity::{Astrocommunity, PluginInfo},
     util::{copy_to_clipboard, print_with_syntax},
 };
+
+use std::fmt::Write;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -17,6 +20,10 @@ pub struct Cli {
     /// Print the import statement to stdout, without syntax highlighting
     #[arg(short, long)]
     pub output: bool,
+
+    /// Unroll the code for the selected plugins
+    #[arg(short, long)]
+    pub unroll: bool,
 
     #[command(subcommand)]
     pub commands: Option<Commands>,
@@ -74,6 +81,26 @@ impl Cli {
         std::fs::write(new_plugin_file, "")?;
         std::fs::write(new_plugin_readme, "")?;
         println!("Created new plugin at {}", new_plugin_dir.to_str().unwrap());
+        Ok(())
+    }
+
+    /// Unroll code
+    pub fn unroll_code(&self, plugins: &[PluginInfo]) -> Result<()> {
+        if !self.unroll {
+            return Ok(());
+        }
+        let astrocommunity_dir = Astrocommunity::find_astrocommunity_folder()?;
+        // Preallocate the string to avoid reallocations
+        let mut plugin_code = String::with_capacity(100 * plugins.len());
+        for plugin in plugins.iter() {
+            let plugin_path = astrocommunity_dir.join(format!(
+                "lua/astrocommunity/{}/{}/init.lua",
+                plugin.group, plugin.name
+            ));
+
+            writeln!(plugin_code, "{}", std::fs::read_to_string(plugin_path)?)?;
+        }
+        self.ouput_to_prefered(&plugin_code)?;
         Ok(())
     }
 }

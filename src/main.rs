@@ -46,5 +46,6 @@ async fn main() -> Result<()> {
         )?;
     }
     opts.ouput_to_prefered(&import_statement)?;
+    opts.unroll_code(&selected_plugins)?;
     Ok(())
 }
