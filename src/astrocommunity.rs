@@ -3,7 +3,6 @@ use std::{env, path::PathBuf};
 use anyhow::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use serde::Deserialize;
 use walkdir::WalkDir;
 
 use crate::{file_system, git_operations::GitOperations};
@@ -76,14 +75,5 @@ impl Astrocommunity {
     pub fn find_astrocommunity_folder() -> Result<PathBuf> {
         let astronvim_local_folder = Self::find_astronvim_local_folder()?;
         Ok(astronvim_local_folder.join("lazy/astrocommunity"))
-    }
-
-    /// Fallback method when astrocommunity is not found
-    /// Fallback to the github api to get the tree
-    /// TODO: Implmenent this.
-    fn fallback() -> Result<()> {
-        let git_ops = GitOperations::new();
-        let tree = git_ops.get_astrocommunity_tree()?;
-        Ok(())
     }
 }
