@@ -1,23 +1,13 @@
 use anyhow::Result;
 use cli_clipboard::{ClipboardContext, ClipboardProvider};
-use syntect::{
-    easy::HighlightLines, highlighting::ThemeSet, parsing::SyntaxSet,
-    util::as_24_bit_terminal_escaped,
-};
+use once_cell::sync::Lazy;
 
 pub(crate) fn print_with_syntax(s: &str) -> anyhow::Result<()> {
     // Load these once at the start of your program
-    let ps = SyntaxSet::load_defaults_nonewlines();
-    let ts = ThemeSet::load_defaults();
-
-    let syntax = ps.find_syntax_by_extension("lua").unwrap();
-    let mut h = HighlightLines::new(syntax, &ts.themes["base16-ocean.dark"]);
-
-    for line in s.lines() {
-        let ranges: Vec<(syntect::highlighting::Style, &str)> = h.highlight_line(line, &ps)?;
-        let escaped = as_24_bit_terminal_escaped(&ranges[..], true);
-        println!("{}", escaped);
-    }
+    bat::PrettyPrinter::new()
+        .input_from_bytes(s.as_bytes())
+        .language("lua")
+        .print()?;
     Ok(())
 }
 
