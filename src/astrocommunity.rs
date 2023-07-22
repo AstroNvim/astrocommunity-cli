@@ -35,7 +35,7 @@ impl Astrocommunity {
         Self
     }
 
-    pub fn get_plugins(self) -> Result<Vec<PluginInfo>> {
+    pub fn get_plugins(&self) -> Result<Vec<PluginInfo>> {
         let re = Regex::new(r".*lua/astrocommunity/")?;
 
         let astrocommunity_dir = Self::find_astrocommunity_folder()?;
