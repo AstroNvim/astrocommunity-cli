@@ -5,7 +5,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use walkdir::WalkDir;
 
-use crate::{file_system, git_operations::GitOperations};
+use crate::file_system;
 
 pub static GITHUB_API_TREE_RECURSIVE: Lazy<String> = Lazy::new(|| {
     let file_system = file_system::FileSystem::new();

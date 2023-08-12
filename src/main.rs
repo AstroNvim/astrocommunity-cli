@@ -1,7 +1,6 @@
 mod astrocommunity;
 mod file_system;
 mod fzf;
-mod git_operations;
 mod opts;
 mod util;
 
